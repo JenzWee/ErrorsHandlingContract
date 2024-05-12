@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract FunctionAndErrors {
+    // State variables
+    uint256 public x = 120;
+    uint256 public y = 5;
+
+    // Function to check and return input value if less than or equal to 20
+    function requireExample(uint256 _value) public pure returns (uint256) {
+        require(_value <= 120, "Input value must be less than or equal to 120");
+        return _value;
+    }
+
+    // Function to calculate sum of two state variables and ensure it equals 25
+    function assertExample() public view returns (uint256) {
+        uint256 result = x + y;
+        assert(result == 125);
+        return result;
+    }
+
+    // Function to perform division and revert transaction if denominator is zero
+    function revertExample() public pure returns (uint256) {
+        uint256 a = 120;
+        uint256 b = 0;
+        if (b == 0) {
+            revert("Value must be non-zero");
+        }
+        return a / b;
+    }
+}
