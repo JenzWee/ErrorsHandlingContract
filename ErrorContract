@@ -1,31 +1,65 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract FunctionAndErrors {
+contract ErrorHandling {
     // State variables
-    uint256 public x = 120;
-    uint256 public y = 5;
+    uint256 public count;
 
-    // Function to check and return input value if less than or equal to 20
-    function requireExample(uint256 _value) public pure returns (uint256) {
-        require(_value <= 120, "Input value must be less than or equal to 120");
-        return _value;
+    // Function to increment count by a given value
+    function increment(uint256 _value) public {
+        // Check if input value is greater than zero
+        require(_value > 0, "Input value must be greater than zero");
+        
+        // Increment count by the input value
+        count += _value;
     }
 
-    // Function to calculate sum of two state variables and ensure it equals 25
-    function assertExample() public view returns (uint256) {
-        uint256 result = x + y;
-        assert(result == 125);
+    // Function to decrement count by a given value
+    function decrement(uint256 _value) public {
+        // Check if input value is less than or equal to current count
+        require(_value <= count, "Input value must be less than or equal to current count");
+        
+        // Decrement count by the input value
+        count -= _value;
+    }
+
+    // Function to reset count to zero
+    function reset() public {
+        // Ensure count is not already zero
+        require(count != 0, "Count is already zero");
+        
+        // Reset count to zero
+        count = 0;
+    }
+
+    // Function to withdraw Ether from the contract
+    function withdraw(uint256 _amount) public {
+        // Ensure contract has sufficient balance
+        require(address(this).balance >= _amount, "Insufficient contract balance");
+
+        // Transfer Ether to the sender
+        payable(msg.sender).transfer(_amount);
+    }
+
+    // Function to demonstrate assert statement
+    function assertExample(uint256 _value) public pure returns (uint256) {
+        // Perform some computation
+        uint256 result = _value * 2;
+
+        // Ensure result is positive
+        assert(result > 0);
+
         return result;
     }
 
-    // Function to perform division and revert transaction if denominator is zero
-    function revertExample() public pure returns (uint256) {
-        uint256 a = 120;
-        uint256 b = 0;
-        if (b == 0) {
-            revert("Value must be non-zero");
+    // Function to demonstrate revert statement
+    function revertExample(uint256 _value) public pure returns (uint256) {
+        // Check if input value is within a certain range
+        if (_value < 10 || _value > 100) {
+            revert("Input value must be between 10 and 100");
         }
-        return a / b;
+
+        // Return the input value if within range
+        return _value;
     }
 }
