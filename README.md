@@ -1,4 +1,6 @@
-# FunctionAndErrors
+# Voting System Smart Contract 
+
+This Solidity smart contract, named `VotingSystem`, is designed to create a basic voting system on the Ethereum blockchain.
 
 ## Description
 
@@ -10,22 +12,27 @@ This contract demonstrates the usage of `require()`, `assert()`, and `revert()` 
 - Contract successfully uses `assert()`
 - Contract successfully uses `revert()` statements
 
-### Functionality
+### Component and Functionality
 
-#### `requireExample(uint256 _value) : uint256`
+`admin`: An address variable representing the administrator of the voting system.
+`registeredVoters1`: A mapping that tracks whether a particular Ethereum address is registered as a voter.
+`hasVoted`:  A mapping that tracks whether a registered voter has already cast their vote.
+`votesReceived`: A mapping that keeps track of the number of votes received by each candidate.
 
-- This function checks whether the input `_value` is less than or equal to 120 using `require()`.
-- If the condition is met, it returns the input value; otherwise, it reverts with an error message.
+### Events 
 
-#### `assertExample() : uint256`
+`VoterRegistered`: An event triggered when a new voter is registered.
+`VoteCast`: An event triggered when a registered voter casts their vote for a candidate.
 
-- This function calculates the sum of `x` and `y` and asserts that the result equals 125 using `assert()`.
-- If the assertion fails, the transaction reverts.
+### Modifiers 
 
-#### `revertExample() : uint256`
+`onlyAdmin`: A modifier that restricts certain functions to be callable only by the contract's administrator.
 
-- This function performs division and reverts the transaction if the denominator is zero.
-- It demonstrates the usage of `revert()` to trigger a revert with a custom error message.
+### Functios
+`registerVoter`: Allows the administrator to register a new voter by adding their address to the `registeredVoters` mapping.
+`castVote`: Allows a registered voter to cast their vote for a specific candidate.
+`getVoteCount`: Retrieves the number of votes received by a specific candidate.
+`requireExample`, `assertExample`, `revertExample`: Example functions demonstrating the use of error handling mechanisms.
 
 ### Getting Started
 
@@ -40,72 +47,64 @@ To interact with this contract, you can deploy it on Remix Ethereum IDE or any E
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract ErrorHandling {
-    // State variables
-    uint256 public count;
+contract VotingSystem {
+    address public admin;
+    mapping(address => bool) public registeredVoters;
+    mapping(address => bool) public hasVoted;
+    mapping(address => uint256) public votesReceived;
 
-    // Function to increment count by a given value
-    function increment(uint256 _value) public {
-        // Check if input value is greater than zero
-        require(_value > 0, "Input value must be greater than zero");
-        
-        // Increment count by the input value
-        count += _value;
+    event VoterRegistered(address indexed voter);
+    event VoteCast(address indexed voter, address candidate);
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can perform this action");
+        _;
     }
 
-    // Function to decrement count by a given value
-    function decrement(uint256 _value) public {
-        // Check if input value is less than or equal to current count
-        require(_value <= count, "Input value must be less than or equal to current count");
-        
-        // Decrement count by the input value
-        count -= _value;
+    constructor() {
+        admin = msg.sender;
     }
 
-    // Function to reset count to zero
-    function reset() public {
-        // Ensure count is not already zero
-        require(count != 0, "Count is already zero");
-        
-        // Reset count to zero
-        count = 0;
+    function registerVoter(address _voter) public onlyAdmin {
+        require(!registeredVoters[_voter], "Voter already registered");
+        registeredVoters[_voter] = true;
+        emit VoterRegistered(_voter);
     }
 
-    // Function to withdraw Ether from the contract
-    function withdraw(uint256 _amount) public {
-        // Ensure contract has sufficient balance
-        require(address(this).balance >= _amount, "Insufficient contract balance");
+    function castVote(address _candidate) public {
+        require(registeredVoters[msg.sender], "You are not a registered voter");
+        require(!hasVoted[msg.sender], "You have already cast your vote");
+        require(_candidate != address(0), "Invalid candidate address");
 
-        // Transfer Ether to the sender
-        payable(msg.sender).transfer(_amount);
+        hasVoted[msg.sender] = true;
+        votesReceived[_candidate]++;
+
+        emit VoteCast(msg.sender, _candidate);
     }
 
-    // Function to demonstrate assert statement
+    function getVoteCount(address _candidate) public view returns (uint256) {
+        return votesReceived[_candidate];
+    }
+
+    function requireExample(uint256 _value) public pure returns (uint256) {
+        require(_value > 0, "Value must be greater than zero");
+        return _value;
+    }
+
     function assertExample(uint256 _value) public pure returns (uint256) {
-        // Perform some computation
         uint256 result = _value * 2;
-
-        // Ensure result is positive
-        assert(result > 0);
-
+        assert(result >= _value); // Ensure no overflow
         return result;
     }
 
-    // Function to demonstrate revert statement
     function revertExample(uint256 _value) public pure returns (uint256) {
-        // Check if input value is within a certain range
-        if (_value < 10 || _value > 100) {
-            revert("Input value must be between 10 and 100");
+        if (_value == 0) {
+            revert("Value cannot be zero");
         }
-
-        // Return the input value if within range
         return _value;
     }
 }
-
-
 ```
-
 This is the whole functionality within the code itself and the generalization of how the code will run.
 
 ### Authors
