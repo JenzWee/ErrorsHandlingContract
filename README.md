@@ -1,38 +1,28 @@
 # Voting System Smart Contract 
 
-This Solidity smart contract, named `VotingSystem`, is designed to create a basic voting system on the Ethereum blockchain.
+This Solidity smart contract, named `Voting`, is designed to manage the candidate setup for various positions in an election on the Ethereum blockchain.
 
 ## Description
 
-This contract demonstrates the usage of `require()`, `assert()`, and `revert()` statements for error handling.
+This contract demonstrates the usage of `require()`, `assert()`, and `revert()` statements for error handling in the context of setting and validating candidate numbers for different election positions.
 
 ### Requirements
 
-- Contract successfully uses `require()`
-- Contract successfully uses `assert()`
-- Contract successfully uses `revert()` statements
+- Contract successfully uses `require()`.
+- Contract successfully uses `assert()`.
+- Contract successfully uses `revert()` statements.
 
-### Component and Functionality
+### Components and Functionality
 
-`admin`: An address variable representing the administrator of the voting system.
-`registeredVoters1`: A mapping that tracks whether a particular Ethereum address is registered as a voter.
-`hasVoted`:  A mapping that tracks whether a registered voter has already cast their vote.
-`votesReceived`: A mapping that keeps track of the number of votes received by each candidate.
-
-### Events 
-
-`VoterRegistered`: An event triggered when a new voter is registered.
-`VoteCast`: An event triggered when a registered voter casts their vote for a candidate.
-
-### Modifiers 
-
-`onlyAdmin`: A modifier that restricts certain functions to be callable only by the contract's administrator.
+`presidentCandidates`: A uint256 variable representing the number of candidates for the president position.
+`vicePresidentCandidates`: A uint256 variable representing the number of candidates for the vice president position.
+`secretaryCandidates`: A uint256 variable representing the number of candidates for the secretary position.
 
 ### Functios
-`registerVoter`: Allows the administrator to register a new voter by adding their address to the `registeredVoters` mapping.
-`castVote`: Allows a registered voter to cast their vote for a specific candidate.
-`getVoteCount`: Retrieves the number of votes received by a specific candidate.
-`requireExample`, `assertExample`, `revertExample`: Example functions demonstrating the use of error handling mechanisms.
+
+`requireCandidates`: Sets the number of candidates for each position and uses `require()` to ensure at least one candidate is set for any position.
+`assertTotalCandidates`: Returns the total number of candidates and uses `assert()` to ensure the total number of candidates is greater than zero.
+`revertIfNoCandidates`: Reverts the transaction if no candidates are set for any position.
 
 ### Getting Started
 
@@ -44,66 +34,41 @@ To interact with this contract, you can deploy it on Remix Ethereum IDE or any E
 5. Interact with the deployed contract by calling its functions.
 
 ```solidity
-// SPDX-License-Identifier: MIT
+  // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract VotingSystem {
-    address public admin;
-    mapping(address => bool) public registeredVoters;
-    mapping(address => bool) public hasVoted;
-    mapping(address => uint256) public votesReceived;
+contract Voting {
+    uint256 public presidentCandidates;
+    uint256 public vicePresidentCandidates;
+    uint256 public secretaryCandidates;
+    // Add other positions here if needed
 
-    event VoterRegistered(address indexed voter);
-    event VoteCast(address indexed voter, address candidate);
+    // Function to set the number of candidates for each position with a requirement
+    function requireCandidates(uint256 _president, uint256 _vicePresident, uint256 _secretary) public {
+        require(_president > 0 || _vicePresident > 0 || _secretary > 0, "Need at least 1 candidate");
 
-    modifier onlyAdmin() {
-        require(msg.sender == admin, "Only admin can perform this action");
-        _;
+        presidentCandidates = _president;
+        vicePresidentCandidates = _vicePresident;
+        secretaryCandidates = _secretary;
+        // Add other positions here if needed
     }
 
-    constructor() {
-        admin = msg.sender;
+    // Function to assert and return the total number of candidates
+    function assertTotalCandidates() public view returns (uint256) {
+        uint256 totalCandidates = presidentCandidates + vicePresidentCandidates + secretaryCandidates;
+        // Add other positions here if needed
+        assert(totalCandidates > 0);  // Ensure the total number of candidates is greater than 0
+        return totalCandidates;
     }
 
-    function registerVoter(address _voter) public onlyAdmin {
-        require(!registeredVoters[_voter], "Voter already registered");
-        registeredVoters[_voter] = true;
-        emit VoterRegistered(_voter);
-    }
-
-    function castVote(address _candidate) public {
-        require(registeredVoters[msg.sender], "You are not a registered voter");
-        require(!hasVoted[msg.sender], "You have already cast your vote");
-        require(_candidate != address(0), "Invalid candidate address");
-
-        hasVoted[msg.sender] = true;
-        votesReceived[_candidate]++;
-
-        emit VoteCast(msg.sender, _candidate);
-    }
-
-    function getVoteCount(address _candidate) public view returns (uint256) {
-        return votesReceived[_candidate];
-    }
-
-    function requireExample(uint256 _value) public pure returns (uint256) {
-        require(_value > 0, "Value must be greater than zero");
-        return _value;
-    }
-
-    function assertExample(uint256 _value) public pure returns (uint256) {
-        uint256 result = _value * 2;
-        assert(result >= _value); // Ensure no overflow
-        return result;
-    }
-
-    function revertExample(uint256 _value) public pure returns (uint256) {
-        if (_value == 0) {
-            revert("Value cannot be zero");
+    // Function to revert if no candidates are set
+    function revertIfNoCandidates() public view {
+        if (presidentCandidates == 0 && vicePresidentCandidates == 0 && secretaryCandidates == 0) {
+            revert("Need at least 1 candidate");
         }
-        return _value;
     }
 }
+
 ```
 This is the whole functionality within the code itself and the generalization of how the code will run.
 
